@@ -1,0 +1,190 @@
+---
+title: "Qiaoyu_Learning"
+format: html
+editor: visual
+---
+
+## Lavaan
+
+Introduce the basic components of lavaan: the model syntax, the fitting functions (cfa, sem and growth), and the main extractor functions (summary, coef, fitted, inspect)
+
+Load dataset
+
+```{r}
+?HolzingerSwineford1939
+```
+
+visual =\~ x1 + x2 + x3 textual =\~ x4 + x5 + x6 speed =\~ x7 + x8 + x9
+
+visual textual speed: all altent variables that can not be directly measured, rather inferred by other measurements, such as x1 - x9(latent variable =\~ indicator1 + indicator2 + indicator3)
+
+Model it
+
+```{r}
+HS.model <- ' visual  =~ x1 + x2 + x3 
+              textual =~ x4 + x5 + x6
+              speed   =~ x7 + x8 + x9 '
+```
+
+fit the model in CFA (confirmatory factor analysis models.)
+
+```{r}
+fit <- cfa(HS.model, data = HolzingerSwineford1939)
+```
+
+Summary the fit
+
+```{r}
+summary(fit, fit.measures = TRUE)
+
+```
+
+### Result explanation
+
+#### The header (first 9 lines)
+
+-   lavaan 0.6-19 (version number) ended normally after 35 iterations (how many iteration were needed)
+
+-   Estimator ML (maximum likelihood, the estimator that was used)
+
+-   Optimization method NLMINB(the optimizer that used to find the best fitting parameter values )
+
+-   Number of model parameters 21
+
+-   Number of observations (that were effectively used in the analysis) 301
+
+-   **Model Test User Model:** (provides a test statistic, degrees of freedom, and a p-value for the model that was specified by the user)
+
+    Test statistic 85.306
+
+    Degrees of freedom 24
+
+    P-value (Chi-square) 0.000
+
+#### Additional fit measures
+
+Only shown because we use the optional argument fit.measures = TRUE
+
+-   Model Test Baseline Model:
+
+    Test statistic 918.852 Degrees of freedom 36 P-value 0.000
+
+    User Model versus Baseline Model:
+
+    Comparative Fit Index (CFI) 0.931 Tucker-Lewis Index (TLI) 0.896
+
+    Loglikelihood and Information Criteria:
+
+    Loglikelihood user model (H0) -3737.745 Loglikelihood unrestricted model (H1) -3695.092
+
+    Akaike (AIC) 7517.490 Bayesian (BIC) 7595.339 Sample-size adjusted Bayesian (SABIC) 7528.739
+
+    Root Mean Square Error of Approximation:
+
+    RMSEA 0.092 90 Percent confidence interval - lower 0.071 90 Percent confidence interval - upper 0.114 P-value H_0: RMSEA \<= 0.050 0.001 P-value H_0: RMSEA \>= 0.080 0.840
+
+-   Standardized Root Mean Square Residual:
+
+    SRMR 0.065
+
+#### Parameter Estimates
+
+| Standard errors \| Standard \|
+| Information \| Expected
+| Information saturated (h1) model \| Structured \|
+
+(Information about the method used to compute the standard errors. )
+
+Latent Variables: \| Estimate \| Std.Err \| z-value \| P(\>\|z\|)
+
+visual =\~\
+x1 1.000\
+x2 0.554 0.100 5.554 0.000\
+x3 0.729 0.109 6.685 0.000
+
+textual =\~\
+x4 1.000\
+x5 1.113 0.065 17.014 0.000\
+x6 0.926 0.055 16.703 0.000
+
+speed =\~\
+x7 1.000\
+x8 1.180 0.165 7.152 0.000\
+x9 1.082 0.151 7.155 0.000
+
+(The first column (Estimate) contains the (estimated or fixed) parameter value for each model parameter;
+
+the second column (Std.err) contains the standard error for each estimated parameter;
+
+the third column (Z-value) contains the Wald statistic (which is simply obtained by dividing the parameter value by its standard error),
+
+and the last column (P(\>\|z\|)) contains the p-value for testing the null hypothesis that the parameter value equals zero in the population.)
+
+Covariances: Estimate Std.Err z-value P(\>\|z\|)
+
+visual \~\~\
+textual 0.408 0.074 5.552 0.000
+
+speed 0.262 0.056 4.660 0.000
+
+textual \~\~\
+speed 0.173 0.049 3.518 0.000
+
+Variances: Estimate Std.Err z-value P(\>\|z\|)
+
+.x1 0.549 0.114 4.833 0.000
+
+.x2 1.134 0.102 11.146 0.000
+
+.x3 0.844 0.091 9.317 0.000
+
+.x4 0.371 0.048 7.779 0.000
+
+.x5 0.446 0.058 7.642 0.000
+
+.x6 0.356 0.043 8.277 0.000
+
+.x7 0.799 0.081 9.823 0.000
+
+.x8 0.488 0.074 6.573 0.000
+
+.x9 0.566 0.071 8.003 0.000
+
+visual 0.809 0.145 5.564 0.000
+
+textual 0.979 0.112 8.737 0.000
+
+speed 0.384 0.086 4.451 0.000
+
+( a dot before the observed variables’ names. no dot before latent variable names)
+
+### **Summaries template for CFA model**
+
+```{r}
+# load the lavaan package (only needed once per session)
+library(lavaan)
+
+# specify the model
+HS.model <- ' visual  =~ x1 + x2 + x3      
+              textual =~ x4 + x5 + x6
+              speed   =~ x7 + x8 + x9 '
+
+# fit the model
+fit <- cfa(HS.model, data = HolzingerSwineford1939)
+
+# display summary output
+summary(fit, fit.measures = TRUE)
+```
+
+1.  Specify your model using the lavaan model syntax. In this example, only *latent variable definitions* have been used. In the following examples, other formula types will be used.
+
+2.  Fit the model. This requires a dataset containing the observed variables (or alternatively the sample covariance matrix and the number of observations). In this example, we have used the `cfa()` function. Other functions in the lavaan package are `sem()` and `growth()` for fitting full structural equation models and growth curve models respectively. All three functions are so-called user-friendly functions, in the sense that they take care of many details automatically, so we can keep the model syntax simple and concise. If you wish to fit non-standard models or if you don’t like the idea that things are done for you automatically, you can use the lower-level function `lavaan()` instead, where you have full control.
+
+3.  Extract information from the fitted model. This can be a long verbose summary, or it can be a single number only (say, the RMSEA value). In the spirit of R, you only get what you asked for. We try to not print out unnecessary information that you would ignore anyway.
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
